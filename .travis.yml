@@ -1,0 +1,40 @@
+dist: trusty
+language: scala
+scala:
+  - 2.12.10
+jdk:
+  - oraclejdk8
+before_deploy:
+  - pip install --user release-manager==0.4.1
+  - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+before_script:
+  - psql -U postgres -c "CREATE USER enricher WITH password 'supersecret1';"
+  - psql -U postgres -c "CREATE DATABASE sql_enrichment_test WITH OWNER = enricher;"
+  - psql -U postgres -d sql_enrichment_test < integration-tests/sql-enrichment-test.sql
+  - psql -U postgres -d sql_enrichment_test -c "GRANT ALL ON enrichment_test TO enricher;"
+script:
+  - python integration-tests/api-lookup-test.py &
+  - sbt test
+deploy:
+- provider: script
+  script: release-manager --config ./travis/.release.yml --make-artifact --make-version --upload-artifact
+  skip_cleanup: true
+  on:
+    tags: true
+- provider: script
+  script: sbt docker:publish
+  skip_cleanup: true
+  on:
+    tags: true
+services:
+  - postgresql
+env:
+  global:
+  # BINTRAY_SNOWPLOW_GENERIC_USER
+  - secure: kPX56utFobFT5NDfdBhF58nW8TQb6HKPmaZBhhZLLqJV/vfG1KpChzlaWGgJpUCF61RckpPEKROqfHTtpc3YHSprfCd1z5kKSo6UV+Jb4j188MKxaN7pXhGA7OM2okYqiiaHVywoq0+B9Z51Ygom5rVlZG/mjHEdbeaN1wCJDI0=
+  # BINTRAY_SNOWPLOW_GENERIC_API_KEY
+  - secure: YwhLm1v0EKBQQfUvNzrdyp8MGHDmnAhM51JijlApiPAfgYRJnogoNbmzMAqhbPNubnGFxaD5xgoavHXypaDAMGQoKY7q9WjHnBy1hxHWw8C0Q5vbVtxLroQWYYDi7YuEeY5D7/i3RkqD8bVIvPoHdFCQGuMYpHDke0OHcjrNz0Y=
+  # DOCKER_USERNAME
+  - secure: raLw23n0ruhIPOprVsq+AR6CcQZVqEXcfOBVGsQ1UfcP00gsxSP2H0HbCtHLTqonNSDvG6aZPsg2KgiB9oxoe+1TZAhSqYycPh6WBriTl+6dWHgeog9yVXxYWK4VlPeIvJNenkO53Cn8j/jVPrTNY9tdmLNtAwbrPfepfXwIBdk=
+  # DOCKER_PASSWORD
+  - secure: UhleYVVkQKnw8OfZjagQqLzHgV7pUXD6qYQfa2iOsIR9oazFmgbsbiPwThzAITcyP+USFXq8I2xMVN6mjPo0EzzPN4yzOx8a+ZVK/4Q37hGt210JbfOcgrlIxTIdTTEujcwcZRuv9L303ypL0LNe/0n0mF3KmYH5PSiIc+4qKro=
