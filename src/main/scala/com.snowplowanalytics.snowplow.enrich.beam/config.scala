@@ -48,7 +48,8 @@ object config {
     bad: String,
     pii: Option[String],
     resolver: String,
-    enrichments: Option[String]
+    enrichments: Option[String],
+    labels: Option[String]
   )
   object EnrichConfig {
 
@@ -72,7 +73,8 @@ object config {
         bad,
         args.optional("pii"),
         resolver,
-        args.optional("enrichments")
+        args.optional("enrichments"),
+        args.optional("labels")
       )
 
     private val configurations = List(
@@ -88,7 +90,8 @@ object config {
       RequiredConfiguration("bad", "Name of the bad topic projects/{project}/topics/{topic}"),
       OptionalConfiguration("pii", "Name of the pii topic projects/{project}/topics/{topic}"),
       RequiredConfiguration("resolver", "Path to the resolver file"),
-      OptionalConfiguration("enrichments", "Path to the directory containing the enrichment files")
+      OptionalConfiguration("enrichments", "Path to the directory containing the enrichment files"),
+      OptionalConfiguration("labels", "Dataflow labels to be set ie. env=qa1;region=eu")
     )
 
     /** Generates an help string from a list of conifugration */
@@ -119,7 +122,8 @@ object config {
     bad: String,
     pii: Option[String],
     resolver: Json,
-    enrichmentConfs: List[EnrichmentConf]
+    enrichmentConfs: List[EnrichmentConf],
+    labels: Map[String, String]
   )
 
   /**
@@ -180,4 +184,29 @@ object config {
         } yield read
       }
       .getOrElse(Nil.asRight)
+
+  def parseLabels(input: String): Either[String, Map[String, String]] = {
+    val labelDelimiter = ";"
+    val valueDelimiter = "="
+
+    val keyValue = (arr: Array[_]) => arr.size == 2
+    val formatError = (input: String) =>
+      s"Invalid `labels` format, expected: key1${valueDelimiter}value1${labelDelimiter}key2${valueDelimiter}value2, received: $input"
+    val tupled = (v: Array[String]) => v.head -> v.tail.mkString
+
+    val labels: Map[String, String] = input
+      .split(labelDelimiter)
+      .map(_.split(valueDelimiter))
+      .filter(keyValue)
+      .map(tupled)
+      .toMap
+
+    if (input.isEmpty && labels.isEmpty) {
+      Right(Map.empty)
+    } else if (labels.isEmpty) {
+      Left(formatError(input))
+    } else {
+      Right(labels)
+    }
+  }
 }
