@@ -27,7 +27,7 @@ import org.scalatest.Matchers._
 import config._
 import SpecHelpers._
 
-class ConfigSpec extends FreeSpec {
+class ConfigSpec extends FreeSpec with EitherValues {
   "the config object should" - {
     "make an EnrichConfig smart ctor available" - {
       "which fails if --job-name is not present" in {
@@ -102,7 +102,7 @@ class ConfigSpec extends FreeSpec {
             "--bad=b",
             "--pii=p",
             "--resolver=r",
-            "--labels=env=abc"
+            "--labels={\"env\":\"abc\"}"
           )
         )
         EnrichConfig(args) shouldEqual Right(
@@ -114,32 +114,7 @@ class ConfigSpec extends FreeSpec {
             Some("p"),
             "r",
             None,
-            Some("env=abc")
-          )
-        )
-      }
-      "which succeeds if mutliple --labels values as present" in {
-        val args = Args(
-          Array(
-            "--job-name=j",
-            "--raw=i",
-            "--enriched=o",
-            "--bad=b",
-            "--pii=p",
-            "--resolver=r",
-            "--labels=env=abc;dc=abc"
-          )
-        )
-        EnrichConfig(args) shouldEqual Right(
-          EnrichConfig(
-            "j",
-            "i",
-            "o",
-            "b",
-            Some("p"),
-            "r",
-            None,
-            Some("env=abc;dc=abc")
+            Some("{\"env\":\"abc\"}")
           )
         )
       }
@@ -216,16 +191,14 @@ class ConfigSpec extends FreeSpec {
 
     "make a parseLabels function available" - {
       "which splits valid strings" in {
-        parseLabels("env=qa1;key1=va#@^0ue") shouldEqual
+        parseLabels("""{"env":"qa1","key1":"va#@^0ue"}""") shouldEqual
           Right(Map("env" -> "qa1", "key1" -> "va#@^0ue"))
       }
       "which handles empty strings" in {
-        parseLabels("") shouldEqual
-          Right(Map.empty)
+        parseLabels("") should be('left)
       }
       "which reports invalid values" in {
-        parseLabels("env:qa") shouldEqual
-          Left("Invalid `labels` format, expected: key1=value1;key2=value2, received: env:qa")
+        parseLabels("env:qa") should be('left)
       }
     }
   }

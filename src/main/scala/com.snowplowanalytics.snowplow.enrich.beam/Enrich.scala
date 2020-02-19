@@ -66,7 +66,7 @@ object Enrich {
       client <- Client.parseDefault[Id](resolverJson).leftMap(_.toString).value
       registryJson <- parseEnrichmentRegistry(config.enrichments, client)
       confs <- EnrichmentRegistry.parse(registryJson, client, false).leftMap(_.toString).toEither
-      labels <- parseLabels(config.labels.getOrElse(""))
+      labels <- config.labels.map(parseLabels).getOrElse(Right(Map.empty[String, String]))
       _ <- if (emitPii(confs) && config.pii.isEmpty) {
         "A pii topic needs to be used in order to use the pii enrichment".asLeft
       } else {
@@ -94,7 +94,9 @@ object Enrich {
   }
 
   def run(sc: ScioContext, config: ParsedEnrichConfig): Unit = {
-    sc.optionsAs[DataflowPipelineOptions].setLabels(config.labels.asJava)
+    if (config.labels.nonEmpty) {
+      sc.optionsAs[DataflowPipelineOptions].setLabels(config.labels.asJava)
+    }
 
     val cachedFiles: DistCache[List[Either[String, String]]] =
       buildDistCache(sc, config.enrichmentConfs)

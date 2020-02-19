@@ -32,6 +32,7 @@ import com.snowplowanalytics.snowplow.enrich.common.enrichments.registry.Enrichm
 import com.snowplowanalytics.snowplow.enrich.common.utils.JsonUtils
 import com.spotify.scio.Args
 import io.circe.Json
+import io.circe.parser.decode
 import io.circe.syntax._
 
 import utils._
@@ -185,28 +186,7 @@ object config {
       }
       .getOrElse(Nil.asRight)
 
-  def parseLabels(input: String): Either[String, Map[String, String]] = {
-    val labelDelimiter = ";"
-    val valueDelimiter = "="
-
-    val keyValue = (arr: Array[_]) => arr.size == 2
-    val formatError = (input: String) =>
-      s"Invalid `labels` format, expected: key1${valueDelimiter}value1${labelDelimiter}key2${valueDelimiter}value2, received: $input"
-    val tupled = (v: Array[String]) => v.head -> v.tail.mkString
-
-    val labels: Map[String, String] = input
-      .split(labelDelimiter)
-      .map(_.split(valueDelimiter))
-      .filter(keyValue)
-      .map(tupled)
-      .toMap
-
-    if (input.isEmpty && labels.isEmpty) {
-      Right(Map.empty)
-    } else if (labels.isEmpty) {
-      Left(formatError(input))
-    } else {
-      Right(labels)
-    }
-  }
+  def parseLabels(input: String): Either[String, Map[String, String]] =
+    decode[Map[String, String]](input)
+      .leftMap(_ => s"Invalid `labels` format, expected json object, received: $input")
 }
