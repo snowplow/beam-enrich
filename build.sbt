@@ -47,7 +47,7 @@ dockerCommands := dockerCommands.value.map{
   case e => e
 }
 
-lazy val scioVersion = "0.8.1"
+lazy val scioVersion = "0.9.0"
 lazy val beamVersion = "2.18.0"
 lazy val sceVersion = "1.1.0-M1"
 lazy val scalaMacrosVersion = "2.1.1"
