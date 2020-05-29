@@ -20,7 +20,7 @@ import Tests._
 
 lazy val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   organization  := "com.snowplowanalytics",
-  version       := "1.2.1",
+  version       := "1.2.1-rc3",
   scalaVersion  := "2.12.10",
   resolvers     ++= resolutionRepos
 )
