@@ -126,29 +126,29 @@ class PiiEnrichmentSpec extends PipelineSpec {
       .output(PubsubIO.readString("bad")) { b =>
         b should beEmpty; ()
       }
-      .distribution(Enrich.enrichedEventSizeDistribution) { d =>
-        d.getCount() shouldBe 1
-        d.getMin() shouldBe d.getMax()
-        d.getMin() shouldBe d.getSum()
-        d.getMin() shouldBe d.getMean()
-        ()
-      }
-      .distribution(Enrich.timeToEnrichDistribution) { d =>
-        d.getCount() shouldBe 1
-        d.getMin() should be >= 100L
-        d.getMin() shouldBe d.getMax()
-        d.getMin() shouldBe d.getSum()
-        d.getMin() shouldBe d.getMean()
-        ()
-      }
-      .counter(ScioMetrics.counter("snowplow", "vendor_com_google_analytics")) { c =>
-        c shouldBe 1
-        ()
-      }
-      .counter(ScioMetrics.counter("snowplow", "tracker_js_0_13_1")) { c =>
-        c shouldBe 1
-        ()
-      }
+      //      .distribution(Enrich.enrichedEventSizeDistribution) { d =>
+      //        d.getCount() shouldBe 1
+      //        d.getMin() shouldBe d.getMax()
+      //        d.getMin() shouldBe d.getSum()
+      //        d.getMin() shouldBe d.getMean()
+      //        ()
+      //      }
+      //      .distribution(Enrich.timeToEnrichDistribution) { d =>
+      //        d.getCount() shouldBe 1
+      //        d.getMin() should be >= 100L
+      //        d.getMin() shouldBe d.getMax()
+      //        d.getMin() shouldBe d.getSum()
+      //        d.getMin() shouldBe d.getMean()
+      //        ()
+      //      }
+      //      .counter(ScioMetrics.counter("snowplow", "vendor_com_google_analytics")) { c =>
+      //        c shouldBe 1
+      //        ()
+      //      }
+      //      .counter(ScioMetrics.counter("snowplow", "tracker_js_0_13_1")) { c =>
+      //        c shouldBe 1
+      //        ()
+      //      }
       .run()
   }
 

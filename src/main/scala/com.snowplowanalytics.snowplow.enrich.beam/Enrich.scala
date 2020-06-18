@@ -51,11 +51,6 @@ object Enrich {
   private val MaxRecordSize = 10000000
   private val MetricsNamespace = "snowplow"
 
-  val enrichedEventSizeDistribution =
-    ScioMetrics.distribution(MetricsNamespace, "enriched_event_size_bytes")
-  val timeToEnrichDistribution =
-    ScioMetrics.distribution(MetricsNamespace, "time_to_enrich_ms")
-
   val processor = Processor(generated.BuildInfo.name, generated.BuildInfo.version)
 
   def main(cmdlineArgs: Array[String]): Unit = {
@@ -195,16 +190,12 @@ object Enrich {
       .withName("enrich")
       .map { rawEvent =>
         cachedFiles()
-        val (enriched, time) = timeMs {
-          enrich(
-            rawEvent,
-            EnrichmentRegistrySingleton.get(enrichmentConfs),
-            ClientSingleton.get(resolver),
-            sentryDSN
-          )
-        }
-        timeToEnrichDistribution.update(time)
-        enriched
+        enrich(
+          rawEvent,
+          EnrichmentRegistrySingleton.get(enrichmentConfs),
+          ClientSingleton.get(resolver),
+          sentryDSN
+        )
       }
       .withName("flatten-enriched")
       .flatten
@@ -221,11 +212,8 @@ object Enrich {
     enriched
       .withName("format-enriched")
       .map { enrichedEvent =>
-        getEnrichedEventMetrics(enrichedEvent)
-          .foreach(ScioMetrics.counter(MetricsNamespace, _).inc())
         val formattedEnrichedEvent = tabSeparatedEnrichedEvent(enrichedEvent)
         val size = getSize(formattedEnrichedEvent)
-        enrichedEventSizeDistribution.update(size.toLong)
         (formattedEnrichedEvent, size)
       }
       .withName("split-oversized")
