@@ -78,29 +78,29 @@ class IpLookupsEnrichmentSpec extends PipelineSpec {
       .output(PubsubIO.readString("bad")) { b =>
         b should beEmpty; ()
       }
-      .distribution(Enrich.enrichedEventSizeDistribution) { d =>
-        d.getCount() shouldBe 1
-        d.getMin() shouldBe d.getMax()
-        d.getMin() shouldBe d.getSum()
-        d.getMin() shouldBe d.getMean()
-        ()
-      }
-      .distribution(Enrich.timeToEnrichDistribution) { d =>
-        d.getCount() shouldBe 1
-        d.getMin() should be >= 100L
-        d.getMin() shouldBe d.getMax()
-        d.getMin() shouldBe d.getSum()
-        d.getMin() shouldBe d.getMean()
-        ()
-      }
-      .counter(ScioMetrics.counter("snowplow", "vendor_com_snowplowanalytics_snowplow")) { c =>
-        c shouldBe 1
-        ()
-      }
-      .counter(ScioMetrics.counter("snowplow", "tracker_tracker_version")) { c =>
-        c shouldBe 1
-        ()
-      }
+      //      .distribution(Enrich.enrichedEventSizeDistribution) { d =>
+      //        d.getCount() shouldBe 1
+      //        d.getMin() shouldBe d.getMax()
+      //        d.getMin() shouldBe d.getSum()
+      //        d.getMin() shouldBe d.getMean()
+      //        ()
+      //      }
+      //      .distribution(Enrich.timeToEnrichDistribution) { d =>
+      //        d.getCount() shouldBe 1
+      //        d.getMin() should be >= 100L
+      //        d.getMin() shouldBe d.getMax()
+      //        d.getMin() shouldBe d.getSum()
+      //        d.getMin() shouldBe d.getMean()
+      //        ()
+      //      }
+      //      .counter(ScioMetrics.counter("snowplow", "vendor_com_snowplowanalytics_snowplow")) { c =>
+      //        c shouldBe 1
+      //        ()
+      //      }
+      //      .counter(ScioMetrics.counter("snowplow", "tracker_tracker_version")) { c =>
+      //        c shouldBe 1
+      //        ()
+      //      }
       .run()
 
     SpecHelpers.deleteLocalFile(localFile)
