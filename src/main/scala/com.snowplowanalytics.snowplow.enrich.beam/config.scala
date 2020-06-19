@@ -77,7 +77,9 @@ object config {
         resolver,
         args.optional("enrichments"),
         args.optional("labels"),
-        args.optional("sentry-dsn")
+        args
+          .optional("sentry-dsn")
+          .map(dsnWithQuotes => dsnWithQuotes.substring(1, dsnWithQuotes.length - 1))
       )
 
     private val configurations = List(
