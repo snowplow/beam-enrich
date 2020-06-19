@@ -129,7 +129,7 @@ class ConfigSpec extends AnyFreeSpec with EitherValues {
             "--bad=b",
             "--pii=p",
             "--resolver=r",
-            "--sentry-dsn=DSN"
+            "--sentry-dsn=\"DSN\""
           )
         )
         EnrichConfig(args) shouldEqual Right(
