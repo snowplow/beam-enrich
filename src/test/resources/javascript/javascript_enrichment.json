@@ -1,0 +1,11 @@
+{
+  "schema": "iglu:com.snowplowanalytics.snowplow/javascript_script_config/jsonschema/1-0-0",
+  "data": {
+    "vendor": "com.snowplowanalytics.snowplow",
+    "name": "javascript_script_config",
+    "enabled": true,
+    "parameters": {
+      "script": "ZnVuY3Rpb24gcHJvY2VzcyhldmVudCkgewogICAgcmV0dXJuIFsgCiAgICAgICAgeyAKICAgICAgICAgICAgc2NoZW1hOiAiaWdsdTpjb20uc25vd3Bsb3dhbmFseXRpY3Muc25vd3Bsb3cvd2ViX3BhZ2UvanNvbnNjaGVtYS8xLTAtMCIsCiAgICAgICAgICAgIGRhdGE6IHsgCiAgICAgICAgICAgICAgICBpZDogZXZlbnQuZ2V0QXBwX2lkKCkgCiAgICAgICAgICAgIH0gCiAgICAgICAgfSAKICAgIF07Cn0="
+    }
+  }
+}
